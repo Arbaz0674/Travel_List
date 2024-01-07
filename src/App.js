@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
-  const numItems = items.length;
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
   }
@@ -12,7 +11,7 @@ export default function App() {
   function handleToggleItem(id) {
     setItems((items) =>
       items.map((item) =>
-        item.id === id ? { ...item, packed: !item.packed } : { item }
+        item.id === id ? { ...item, packed: !item.packed } : item
       )
     );
   }
@@ -21,11 +20,11 @@ export default function App() {
       <Logo></Logo>
       <Form onAddItems={handleAddItems}></Form>
       <PackingList
-        item={items}
+        items={items}
         onDeleteItem={handleDeleteItem}
         onToggleItem={handleToggleItem}
       ></PackingList>
-      <Stats numItems={numItems}></Stats>
+      <Stats items={items}></Stats>
     </div>
   );
 }
@@ -72,11 +71,11 @@ function Form({ onAddItems }) {
     </form>
   );
 }
-function PackingList({ item, onDeleteItem, onToggleItem }) {
+function PackingList({ items, onDeleteItem, onToggleItem }) {
   return (
     <div className="list">
       <ul>
-        {item.map((item) => (
+        {items.map((item) => (
           <Item
             item={item}
             key={item.id}
@@ -93,7 +92,6 @@ function Item({ item, onDeleteItem, onToggleItem }) {
     <li>
       <input
         type="checkbox"
-        id={item.id}
         value={item.packed}
         onChange={() => onToggleItem(item.id)}
       />
@@ -104,11 +102,25 @@ function Item({ item, onDeleteItem, onToggleItem }) {
     </li>
   );
 }
-function Stats({ numItems }) {
+function Stats({ items }) {
+  if (!items.length) {
+    return (
+      <footer className="stats">
+        <em>Start Adding some items on Packing list👜</em>
+      </footer>
+    );
+  }
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length;
+  const packedPercent = Math.round((numPacked * 100) / numItems);
   return (
     <footer className="stats">
       <em>
-        You have {numItems} items on your list and you have already packed X.
+        {packedPercent === 100
+          ? `🏃You are all set for the trip`
+          : `You have ${numItems} items on your list and you have already packed ${numPacked} items (${
+              numPacked === 0 ? 0 : packedPercent
+            }%).`}
       </em>
     </footer>
   );
